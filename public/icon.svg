@@ -1,0 +1,8 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rounded bookmark - larger -->
+  <path d="M25 10 L103 10 Q112 10 112 19 L112 115 L64 90 L16 115 L16 19 Q16 10 25 10 Z" fill="#4285f4"/>
+  
+  <!-- Magnifying glass - larger -->
+  <circle cx="85" cy="45" r="18" fill="none" stroke="#ffffff" stroke-width="5"/>
+  <line x1="98" y1="58" x2="115" y2="75" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+</svg>
