@@ -1,0 +1,5 @@
+ignoredBuiltDependencies:
+  - spawn-sync
+
+onlyBuiltDependencies:
+  - esbuild
