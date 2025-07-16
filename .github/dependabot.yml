@@ -1,0 +1,25 @@
+# Config for Dependabot updates. See Documentation here:
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Update GitHub actions in workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      all-github-actions:
+        patterns:
+          - "*"
+
+  # Enable version updates for javascript/npm
+  - package-ecosystem: "npm"
+    # Look for a `packages.json` in the `root` directory
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      all-npm-dependencies:
+        patterns:
+          - "*"
