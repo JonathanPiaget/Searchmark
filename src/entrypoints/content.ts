@@ -55,6 +55,14 @@ export default defineContentScript({
 			}
 		};
 
+		// Listen for messages from popup
+		browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+			if (message.type === 'SHOW_NOTIFICATION') {
+				showNotification(message.message, message.isError);
+				sendResponse({ success: true });
+			}
+		});
+
 		document.addEventListener('keydown', handleKeydown);
 	},
 });

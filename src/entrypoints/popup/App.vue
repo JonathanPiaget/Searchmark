@@ -1,26 +1,26 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { i18n } from '#i18n';
+import BookmarkForm from './components/BookmarkForm.vue';
+import SaveButton from './components/SaveButton.vue';
 
 const currentUrl = ref('');
 const currentTitle = ref('');
 const message = ref('');
+const isLoading = ref(false);
+const bookmarkUrl = ref('');
+const bookmarkTitle = ref('');
 
-const getBookmarkToolbarId = async (): Promise<string> => {
+const getBookmarkToolbarId = async () => {
 	try {
-		const bookmarkTree = await browser.bookmarks.getTree();
-		const bookmarkBar = bookmarkTree[0]?.children?.find(
-			(child) =>
-				child.title === 'Bookmarks bar' || child.title === 'Bookmarks Toolbar',
-		);
-		return bookmarkBar?.id || '1';
+		const [tree] = await browser.bookmarks.getTree();
+		return tree.children?.[0]?.id || '1';
 	} catch {
-		// Fallback to default bookmark toolbar ID
 		return '1';
 	}
 };
 
-const saveBookmark = async () => {
+const loadCurrentTab = async () => {
 	try {
 		const [tab] = await browser.tabs.query({
 			active: true,
@@ -30,18 +30,8 @@ const saveBookmark = async () => {
 			currentUrl.value = tab.url;
 			currentTitle.value = tab.title || '';
 
-			const toolbarId = await getBookmarkToolbarId();
-
-			await browser.bookmarks.create({
-				title: currentTitle.value,
-				url: currentUrl.value,
-				parentId: toolbarId,
-			});
-
-			message.value = i18n.t('bookmarkSaved');
-			setTimeout(() => {
-				message.value = '';
-			}, 2000);
+			bookmarkUrl.value = currentUrl.value;
+			bookmarkTitle.value = currentTitle.value;
 		}
 	} catch {
 		message.value = i18n.t('bookmarkError');
@@ -50,78 +40,95 @@ const saveBookmark = async () => {
 		}, 2000);
 	}
 };
+
+onMounted(() => {
+	loadCurrentTab();
+});
+
+const saveBookmark = async () => {
+	isLoading.value = true;
+	try {
+		const toolbarId = await getBookmarkToolbarId();
+
+		await browser.bookmarks.create({
+			title: bookmarkTitle.value,
+			url: bookmarkUrl.value,
+			parentId: toolbarId,
+		});
+
+		// Show success notification in content script
+		const [tab] = await browser.tabs.query({
+			active: true,
+			currentWindow: true,
+		});
+		if (tab?.id) {
+			await browser.tabs.sendMessage(tab.id, {
+				type: 'SHOW_NOTIFICATION',
+				message: i18n.t('bookmarkSaved'),
+				isError: false,
+			});
+		}
+
+		// Close the popup
+		window.close();
+	} catch {
+		message.value = i18n.t('bookmarkError');
+		setTimeout(() => {
+			message.value = '';
+		}, 2000);
+	} finally {
+		isLoading.value = false;
+	}
+};
 </script>
 
 <template>
   <div class="container">
     <div class="header">
-      <h1>SearchMark</h1>
-    </div>
-
-    <div class="save-section">
-      <button @click="saveBookmark" class="save-button">
-        {{ i18n.t('saveBookmark') }}
-      </button>
-      <div v-if="message" class="message" :class="{ 'error': message.includes('Error') }">
-        {{ message }}
+      <div class="logo-container">
+        <img src="/icon.svg" alt="SearchMark Logo" class="logo">
+        <h1>SearchMark</h1>
       </div>
     </div>
+
+    <BookmarkForm
+      v-model:model-url="bookmarkUrl"
+      v-model:model-title="bookmarkTitle"
+      @enter-pressed="saveBookmark"
+    />
+
+    <SaveButton
+      :message="message"
+      :is-loading="isLoading"
+      @save="saveBookmark"
+    />
   </div>
 </template>
 
 <style scoped>
 .container {
-  width: 280px;
+  width: 320px;
   padding: 16px;
+  background: white;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.logo {
+  width: 24px;
+  height: 24px;
 }
 
 .header h1 {
   font-size: 18px;
   font-weight: 600;
-  margin: 0 0 16px 0;
-  text-align: center;
+  margin: 0;
   color: #1a1a1a;
-}
-
-.save-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.save-button {
-  background: #007AFF;
-  color: white;
-  border: none;
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.save-button:hover {
-  background: #0056CC;
-}
-
-.save-button:active {
-  transform: scale(0.98);
-}
-
-.message {
-  font-size: 13px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  text-align: center;
-  background: #E8F5E8;
-  color: #2D5A2D;
-  border: 1px solid #B8E6B8;
-}
-
-.message.error {
-  background: #FFE6E6;
-  color: #CC0000;
-  border: 1px solid #FFB8B8;
 }
 </style>

@@ -2,3 +2,8 @@ saveBookmark: Enregistrer le marque-page
 shortcutHint: Appuyez sur Cmd+Shift+S (Mac) ou Ctrl+S pour enregistrer rapidement
 bookmarkSaved: Marque-page enregistré avec succès
 bookmarkError: Erreur lors de l'enregistrement du marque-page
+customizeBookmark: Personnaliser le marque-page
+url: URL
+title: Titre
+save: Enregistrer
+cancel: Annuler
