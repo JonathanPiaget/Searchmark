@@ -15,8 +15,7 @@
 		"postinstall": "wxt prepare",
 		"format": "biome format --write",
 		"lint": "biome lint --write",
-		"check": "biome check --write",
-		"ci": "biome ci"
+		"check": "biome check --write"
 	},
 	"dependencies": {
 		"@wxt-dev/i18n": "^0.2.4",
