@@ -1,31 +1,127 @@
 <script lang="ts" setup>
+import { ref } from 'vue';
 import { i18n } from '#i18n';
-import HelloWorld from '@/components/HelloWorld.vue';
+
+const currentUrl = ref('');
+const currentTitle = ref('');
+const message = ref('');
+
+const getBookmarkToolbarId = async (): Promise<string> => {
+	try {
+		const bookmarkTree = await browser.bookmarks.getTree();
+		const bookmarkBar = bookmarkTree[0]?.children?.find(
+			(child) =>
+				child.title === 'Bookmarks bar' || child.title === 'Bookmarks Toolbar',
+		);
+		return bookmarkBar?.id || '1';
+	} catch {
+		// Fallback to default bookmark toolbar ID
+		return '1';
+	}
+};
+
+const saveBookmark = async () => {
+	try {
+		const [tab] = await browser.tabs.query({
+			active: true,
+			currentWindow: true,
+		});
+		if (tab?.url) {
+			currentUrl.value = tab.url;
+			currentTitle.value = tab.title || '';
+
+			const toolbarId = await getBookmarkToolbarId();
+
+			await browser.bookmarks.create({
+				title: currentTitle.value,
+				url: currentUrl.value,
+				parentId: toolbarId,
+			});
+
+			message.value = i18n.t('bookmarkSaved');
+			setTimeout(() => {
+				message.value = '';
+			}, 2000);
+		}
+	} catch {
+		message.value = i18n.t('bookmarkError');
+		setTimeout(() => {
+			message.value = '';
+		}, 2000);
+	}
+};
 </script>
 
 <template>
-  <div>
-    <a href="https://wxt.dev" target="_blank">
-      <img src="/wxt.svg" class="logo" alt="WXT logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="@/assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div class="container">
+    <div class="header">
+      <h1>SearchMark</h1>
+    </div>
+
+    <div class="save-section">
+      <button @click="saveBookmark" class="save-button">
+        {{ i18n.t('saveBookmark') }}
+      </button>
+      <div v-if="message" class="message" :class="{ 'error': message.includes('Error') }">
+        {{ message }}
+      </div>
+    </div>
   </div>
-  <HelloWorld :msg="i18n.t('helloWorld')" />
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+.container {
+  width: 280px;
+  padding: 16px;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #54bc4ae0);
+
+.header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  text-align: center;
+  color: #1a1a1a;
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+.save-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.save-button {
+  background: #007AFF;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.save-button:hover {
+  background: #0056CC;
+}
+
+.save-button:active {
+  transform: scale(0.98);
+}
+
+.message {
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-align: center;
+  background: #E8F5E8;
+  color: #2D5A2D;
+  border: 1px solid #B8E6B8;
+}
+
+.message.error {
+  background: #FFE6E6;
+  color: #CC0000;
+  border: 1px solid #FFB8B8;
 }
 </style>
