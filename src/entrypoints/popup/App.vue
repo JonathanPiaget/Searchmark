@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { i18n } from '#i18n';
 import BookmarkForm from './components/BookmarkForm.vue';
+import FolderSelector from './components/FolderSelector.vue';
 import SaveButton from './components/SaveButton.vue';
 
 const currentUrl = ref('');
@@ -10,6 +11,8 @@ const message = ref('');
 const isLoading = ref(false);
 const bookmarkUrl = ref('');
 const bookmarkTitle = ref('');
+const selectedFolderId = ref('');
+const selectedFolderName = ref('');
 
 const getBookmarkToolbarId = async () => {
 	try {
@@ -48,12 +51,12 @@ onMounted(() => {
 const saveBookmark = async () => {
 	isLoading.value = true;
 	try {
-		const toolbarId = await getBookmarkToolbarId();
+		const folderId = selectedFolderId.value || (await getBookmarkToolbarId());
 
 		await browser.bookmarks.create({
 			title: bookmarkTitle.value,
 			url: bookmarkUrl.value,
-			parentId: toolbarId,
+			parentId: folderId,
 		});
 
 		// Show success notification in content script
@@ -62,9 +65,15 @@ const saveBookmark = async () => {
 			currentWindow: true,
 		});
 		if (tab?.id) {
+			const notificationMessage = selectedFolderName.value
+				? i18n
+						.t('bookmarkSavedInFolder')
+						.replace('{folderName}', selectedFolderName.value)
+				: i18n.t('bookmarkSaved');
+
 			await browser.tabs.sendMessage(tab.id, {
 				type: 'SHOW_NOTIFICATION',
-				message: i18n.t('bookmarkSaved'),
+				message: notificationMessage,
 				isError: false,
 			});
 		}
@@ -90,6 +99,12 @@ const saveBookmark = async () => {
         <h1>SearchMark</h1>
       </div>
     </div>
+
+    <FolderSelector
+      v-model="selectedFolderId"
+      @folder-selected="(folder) => selectedFolderName = folder.name"
+      @enter-pressed="saveBookmark"
+    />
 
     <BookmarkForm
       v-model:model-url="bookmarkUrl"

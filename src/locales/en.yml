@@ -1,9 +1,16 @@
 saveBookmark: Save Bookmark
 shortcutHint: Press Cmd+Shift+S (Mac) or Ctrl+S to save quickly
 bookmarkSaved: Bookmark saved successfully
+bookmarkSavedInFolder: Bookmark saved to "{folderName}"
 bookmarkError: Error saving bookmark
 customizeBookmark: Customize Bookmark
 url: URL
 title: Title
+folder: Folder
+selectFolder: Select a folder
+searchFolders: Search folders...
+childOf: child of
+contains: Contains
+more: more
 save: Save
 cancel: Cancel
