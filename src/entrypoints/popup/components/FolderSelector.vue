@@ -15,6 +15,9 @@
           @focus="onFocus"
           @blur="onBlur"
         >
+        <div v-if="showDropdown && searchQuery.trim()" class="shortcut-hint">
+          {{ i18n.t('expandHint') }}
+        </div>
         <div
           v-if="showDropdown && searchQuery.trim()"
           class="dropdown-container"
@@ -40,7 +43,7 @@
                   ({{ item.folder.children.length }} {{ item.folder.children.length === 1 ? i18n.t('child') : i18n.t('children') }})
                 </span>
                 <span class="expand-hint">
-                  {{ i18n.t('tabToExpand') }}
+                  →
                 </span>
               </div>
             </div>
@@ -426,6 +429,16 @@ onMounted(() => {
   position: relative;
 }
 
+.shortcut-hint {
+  font-size: 11px;
+  color: #666;
+  margin-top: 2px;
+  margin-bottom: 4px;
+  font-style: italic;
+  text-align: center;
+  opacity: 0.8;
+}
+
 .form-input {
   width: 100%;
   padding: 8px 12px;
@@ -502,13 +515,16 @@ onMounted(() => {
 }
 
 .expand-hint {
-  font-size: 10px;
+  font-size: 12px;
   color: #999;
-  margin-left: auto;
+  margin-left: 6px;
   background: #f0f0f0;
-  padding: 1px 4px;
-  border-radius: 2px;
-  font-style: italic;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 .dropdown-item:hover .children-count,
@@ -538,13 +554,15 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   flex: 1;
+  min-width: 0;
 }
 
 .folder-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 .folder-icon {
@@ -554,6 +572,11 @@ onMounted(() => {
 .folder-name {
   font-weight: 500;
   color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .child-indicator {

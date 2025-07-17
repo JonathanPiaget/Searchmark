@@ -14,8 +14,8 @@ contains: Contient
 more: de plus
 child: enfant
 children: enfants
-tabToExpand: Shift+Space pour étendre
 noFoldersFound: Aucun dossier trouvé
 tryDifferentSearch: Essayez un terme de recherche différent
+expandHint: Appuyez sur Shift+Espace pour étendre les dossiers avec enfants
 save: Enregistrer
 cancel: Annuler
