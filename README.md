@@ -1,6 +1,17 @@
 # SearchMark
 
-A powerful browser extension for Firefox and Chrome that enhances bookmark management with quick save functionality and advanced search capabilities.
+A browser extension for efficient bookmark management with search capabilities.
+
+## Features
+
+**Quick Save**
+Save bookmarks using global keyboard shortcuts without opening browser menus. Press `Cmd+Shift+S` (Mac) or `Ctrl+Shift+S` (Windows/Linux) to open the popup for custom folder selection, or `Cmd+Shift+B` (Mac) or `Ctrl+Shift+B` (Windows/Linux) to quickly save to your bookmark toolbar.
+
+**Folder Search**
+Find bookmark folders by typing their names. Navigate results with arrow keys and expand folders with children. The interface highlights matching text and shows folder paths for easy identification.
+
+**Multi-language Support**
+Currently supports English and French, with the architecture in place to easily add additional languages in the future.
 
 ## Development
 
@@ -10,30 +21,35 @@ pnpm install
 pnpm run dev
 ```
 
-### Code Quality
-This project uses [pre-commit](https://pre-commit.com/) hooks to ensure code quality:
-
-- **Biome**: Linting and formatting for JavaScript/TypeScript/Vue files
-- **Security scanning**: Detects secrets and potential vulnerabilities
-- **File checks**: Trailing whitespace, file endings, YAML/JSON validation
-
-To install pre-commit hooks:
-```bash
-pre-commit install
-```
-
-To run checks manually:
-```bash
-pre-commit run --all-files
-```
-
 ### Available Scripts
 - `pnpm run dev` - Start development server
 - `pnpm run build` - Build for production
-- `pnpm run format` - Format code with Biome
-- `pnpm run lint` - Lint code with Biome
-- `pnpm run check` - Run Biome checks
+- `pnpm run check` - Run linting and formatting
+- `pnpm run zip` - Create distribution package
 
-## Recommended IDE Setup
+### Tech Stack
+- **Framework**: [WXT](https://wxt.dev/) - Modern web extension framework
+- **Frontend**: Vue.js 3 with TypeScript
+- **Styling**: Scoped CSS with shared components
+- **Internationalization**: @wxt-dev/i18n
+- **Code Quality**: Biome for linting and formatting
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar).
+### Code Quality
+This project uses [pre-commit](https://pre-commit.com/) hooks.
+
+```bash
+pre-commit install          # Install hooks
+pre-commit run --all-files  # Run manually
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Support
+
+If you encounter any issues or have questions, please [open an issue](https://github.com/JonathanPiaget/Searchmark/issues).
