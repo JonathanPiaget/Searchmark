@@ -81,27 +81,12 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from 'vue';
 import { i18n } from '#i18n';
-
-interface BookmarkNode {
-	id: string;
-	title: string;
-	url?: string;
-	parentId?: string;
-	children?: BookmarkNode[];
-}
-
-interface BookmarkFolder {
-	id: string;
-	title: string;
-	path: string;
-	parentId?: string;
-	children?: BookmarkFolder[];
-}
-
-interface SearchResultItem {
-	folder: BookmarkFolder;
-	type: 'match' | 'parent';
-}
+import type { SearchResultItem } from '../../../composables/useFolderSearch';
+import { useFolderSearch } from '../../../composables/useFolderSearch';
+import type { BookmarkFolder } from '../../../composables/useFolderTree';
+import { useFolderTree } from '../../../composables/useFolderTree';
+import { useKeyboardNavigation } from '../../../composables/useKeyboardNavigation';
+import { getBookmarkToolbarId } from '../../../utils/bookmark';
 
 interface Props {
 	modelValue: string;
@@ -116,166 +101,39 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-const searchQuery = ref('');
 const showDropdown = ref(false);
 const folderInput = ref<HTMLInputElement>();
-const allFolders = ref<BookmarkFolder[]>([]);
-const folderMap = ref<Map<string, BookmarkFolder>>(new Map());
-const searchResults = ref<SearchResultItem[]>([]);
-const highlightedIndex = ref(-1);
 const selectedFolder = ref<BookmarkFolder | null>(null);
-const showChildrenFor = ref<string | null>(null);
 
-const buildFolderTree = (
-	nodes: BookmarkNode[],
-	parentPath = '',
-	level = 0,
-): BookmarkFolder[] => {
-	const folders: BookmarkFolder[] = [];
+const { allFolders, loadFolders } = useFolderTree();
+const { searchQuery, searchResults, searchFolders, highlightText } =
+	useFolderSearch(allFolders);
+const { highlightedIndex, showChildrenFor, handleNavigation, resetNavigation } =
+	useKeyboardNavigation();
 
-	for (const node of nodes) {
-		if (!node.url) {
-			// This is a folder
-			const folder: BookmarkFolder = {
-				id: node.id,
-				title: node.title,
-				path: parentPath,
-				parentId: node.parentId,
-				children: [],
-			};
+const initializeFolders = async () => {
+	await loadFolders();
 
-			folders.push(folder);
-
-			if (node.children) {
-				const currentPath = parentPath
-					? `${parentPath} > ${node.title}`
-					: node.title;
-				const childFolders = buildFolderTree(
-					node.children,
-					currentPath,
-					level + 1,
-				);
-				folder.children = childFolders.filter(
-					(child) => child.parentId === node.id,
-				);
-				folders.push(...childFolders);
-			}
+	if (!props.modelValue) {
+		const toolbarId = await getBookmarkToolbarId();
+		const bookmarkToolbar = allFolders.value.find((f) => f.id === toolbarId);
+		if (bookmarkToolbar) {
+			selectedFolder.value = bookmarkToolbar;
+			searchQuery.value = bookmarkToolbar.title;
+			emit('update:modelValue', bookmarkToolbar.id);
+			emit('folderSelected', {
+				id: bookmarkToolbar.id,
+				name: bookmarkToolbar.title,
+			});
 		}
 	}
-
-	return folders;
-};
-
-const loadFolders = async () => {
-	try {
-		const tree = await browser.bookmarks.getTree();
-		const folders = buildFolderTree(tree as BookmarkNode[]);
-
-		// Filter out root folders we don't want to show
-		allFolders.value = folders.filter(
-			(folder) =>
-				folder.title !== '' &&
-				folder.id !== '0' &&
-				folder.title !== 'Bookmarks Menu',
-		);
-
-		// Create a map for quick lookup
-		folderMap.value.clear();
-		for (const folder of allFolders.value) {
-			folderMap.value.set(folder.id, folder);
-		}
-
-		// Set default to bookmark toolbar if no selection
-		if (!props.modelValue) {
-			const bookmarkToolbar = allFolders.value.find(
-				(f) =>
-					f.title === 'Bookmarks Toolbar' ||
-					f.title === 'Bookmarks Bar' ||
-					f.title === 'Barre de favoris',
-			);
-			if (bookmarkToolbar) {
-				selectedFolder.value = bookmarkToolbar;
-				searchQuery.value = bookmarkToolbar.title; // Show folder name in input
-				emit('update:modelValue', bookmarkToolbar.id);
-				emit('folderSelected', {
-					id: bookmarkToolbar.id,
-					name: bookmarkToolbar.title,
-				});
-			}
-		}
-	} catch (error) {
-		console.error('Error loading folders:', error);
-	}
-};
-
-const searchFolders = () => {
-	if (!searchQuery.value.trim()) {
-		searchResults.value = [];
-		return;
-	}
-
-	const query = searchQuery.value.toLowerCase();
-	const results: SearchResultItem[] = [];
-	const addedIds = new Set<string>();
-
-	for (const folder of allFolders.value) {
-		// Only match folder title, not path
-		const titleMatch = folder.title.toLowerCase().includes(query);
-
-		if (titleMatch) {
-			if (!addedIds.has(folder.id)) {
-				// Add the matching folder
-				results.push({
-					folder,
-					type: 'match',
-				});
-				addedIds.add(folder.id);
-			}
-		}
-	}
-
-	searchResults.value = results.slice(0, 10); // Show more results since no children clutter
-	highlightedIndex.value = searchResults.value.length > 0 ? 0 : -1;
-};
-
-const highlightText = (text: string, query: string) => {
-	if (!query.trim()) return text;
-
-	const regex = new RegExp(
-		`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
-		'gi',
-	);
-	return text.replace(regex, '<mark class="highlight">$1</mark>');
-};
-
-const scrollToHighlighted = () => {
-	setTimeout(() => {
-		const highlightedElement = document.querySelector(
-			'.dropdown-item.highlighted',
-		);
-		const dropdownContainer = document.querySelector('.dropdown-container');
-
-		if (highlightedElement && dropdownContainer) {
-			// Check if the element (including expanded children) is fully visible
-			const elementRect = highlightedElement.getBoundingClientRect();
-			const containerRect = dropdownContainer.getBoundingClientRect();
-
-			// If element is partially or fully out of view, scroll to it
-			if (
-				elementRect.top < containerRect.top ||
-				elementRect.bottom > containerRect.bottom
-			) {
-				highlightedElement.scrollIntoView({
-					behavior: 'smooth',
-					block: 'nearest',
-				});
-			}
-		}
-	}, 0);
 };
 
 const onSearchInput = () => {
-	searchFolders();
+	const newHighlightedIndex = searchFolders();
+	if (newHighlightedIndex !== undefined) {
+		highlightedIndex.value = newHighlightedIndex;
+	}
 	showDropdown.value = searchQuery.value.trim().length > 0;
 };
 
@@ -287,9 +145,9 @@ const onFocus = () => {
 
 const selectFolder = (folder: BookmarkFolder) => {
 	selectedFolder.value = folder;
-	searchQuery.value = folder.title; // Show folder name in input
+	searchQuery.value = folder.title;
 	showDropdown.value = false;
-	showChildrenFor.value = null; // Hide expanded children
+	resetNavigation();
 	emit('update:modelValue', folder.id);
 	emit('folderSelected', { id: folder.id, name: folder.title });
 };
@@ -301,11 +159,9 @@ const selectChildFolder = (child: BookmarkFolder) => {
 };
 
 const onBlur = () => {
-	// Delay hiding dropdown to allow click events
 	setTimeout(() => {
 		showDropdown.value = false;
-		showChildrenFor.value = null;
-		// If a folder is selected, restore its name; otherwise clear
+		resetNavigation();
 		if (!showDropdown.value && selectedFolder.value) {
 			searchQuery.value = selectedFolder.value.title;
 		} else if (!showDropdown.value) {
@@ -318,51 +174,26 @@ const handleKeydown = (event: KeyboardEvent) => {
 	if (!showDropdown.value && searchQuery.value.trim()) {
 		if (event.key === 'ArrowDown' || event.key === 'Enter') {
 			showDropdown.value = true;
-			searchFolders();
+			const newHighlightedIndex = searchFolders();
+			if (newHighlightedIndex !== undefined) {
+				highlightedIndex.value = newHighlightedIndex;
+			}
 			return;
 		}
 	}
 
 	if (showDropdown.value && searchResults.value.length > 0) {
-		if (event.key === 'ArrowDown') {
-			event.preventDefault();
-			showChildrenFor.value = null; // Hide children when navigating
-			highlightedIndex.value = Math.min(
-				highlightedIndex.value + 1,
-				searchResults.value.length - 1,
-			);
-			scrollToHighlighted();
-		} else if (event.key === 'ArrowUp') {
-			event.preventDefault();
-			showChildrenFor.value = null; // Hide children when navigating
-			highlightedIndex.value = Math.max(highlightedIndex.value - 1, 0);
-			scrollToHighlighted();
-		} else if (event.key === ' ' && event.shiftKey) {
-			event.preventDefault();
-			const currentItem = searchResults.value[highlightedIndex.value];
-			if (
-				currentItem?.folder.children &&
-				currentItem.folder.children.length > 0
-			) {
-				showChildrenFor.value =
-					showChildrenFor.value === currentItem.folder.id
-						? null
-						: currentItem.folder.id;
-				// Ensure expanded item is visible after expansion
-				setTimeout(() => scrollToHighlighted(), 100);
-			}
-		} else if (event.key === 'Enter') {
-			event.preventDefault();
-			if (
-				highlightedIndex.value >= 0 &&
-				searchResults.value[highlightedIndex.value]
-			) {
-				selectFolder(searchResults.value[highlightedIndex.value].folder);
-				return; // Don't emit enterPressed when selecting a folder
-			}
-			emit('enterPressed');
-			return;
-		}
+		handleNavigation(event, searchResults.value, {
+			onEnter: (item) => selectFolder(item.folder),
+			onEscape: () => {
+				showDropdown.value = false;
+				searchQuery.value = '';
+				resetNavigation();
+				folderInput.value?.blur();
+			},
+			onEmitEnter: () => emit('enterPressed'),
+		});
+		return;
 	}
 
 	if (event.key === 'Enter') {
@@ -370,7 +201,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 	} else if (event.key === 'Escape') {
 		showDropdown.value = false;
 		searchQuery.value = '';
-		showChildrenFor.value = null;
+		resetNavigation();
 		folderInput.value?.blur();
 	}
 };
@@ -400,8 +231,7 @@ watch(
 );
 
 onMounted(() => {
-	loadFolders();
-	// Auto-focus the folder input when mounted
+	initializeFolders();
 	setTimeout(() => {
 		folderInput.value?.focus();
 	}, 100);
