@@ -172,7 +172,10 @@ const onBlur = () => {
 
 const handleKeydown = (event: KeyboardEvent) => {
 	if (!showDropdown.value && searchQuery.value.trim()) {
-		if (event.key === 'ArrowDown' || event.key === 'Enter') {
+		if (
+			event.key === 'ArrowDown' ||
+			(event.key === 'Enter' && !selectedFolder.value)
+		) {
 			showDropdown.value = true;
 			const newHighlightedIndex = searchFolders();
 			if (newHighlightedIndex !== undefined) {
@@ -197,7 +200,9 @@ const handleKeydown = (event: KeyboardEvent) => {
 	}
 
 	if (event.key === 'Enter') {
-		emit('enterPressed');
+		if (selectedFolder.value) {
+			emit('enterPressed');
+		}
 	} else if (event.key === 'Escape') {
 		showDropdown.value = false;
 		searchQuery.value = '';
