@@ -14,7 +14,7 @@ contains: Contains
 more: more
 child: child
 children: children
-tabToExpand: → to expand
+tabToExpand: Shift+Space to expand
 noFoldersFound: No folders found
 tryDifferentSearch: Try a different search term
 save: Save

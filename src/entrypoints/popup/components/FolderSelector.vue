@@ -334,7 +334,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 			showChildrenFor.value = null; // Hide children when navigating
 			highlightedIndex.value = Math.max(highlightedIndex.value - 1, 0);
 			scrollToHighlighted();
-		} else if (event.key === 'ArrowRight') {
+		} else if (event.key === ' ' && event.shiftKey) {
 			event.preventDefault();
 			const currentItem = searchResults.value[highlightedIndex.value];
 			if (
@@ -373,7 +373,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 };
 
 const handleItemKeydown = (event: KeyboardEvent, item: SearchResultItem) => {
-	if (event.key === 'ArrowRight') {
+	if (event.key === ' ' && event.shiftKey) {
 		event.preventDefault();
 		if (item.folder.children && item.folder.children.length > 0) {
 			showChildrenFor.value =
