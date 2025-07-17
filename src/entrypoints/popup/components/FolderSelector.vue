@@ -19,58 +19,58 @@
           v-if="showDropdown && searchQuery.trim()"
           class="dropdown-container"
         >
-          <div v-if="searchResults.length > 0">
-            <div
-              v-for="(item, index) in searchResults"
-              :key="`${item.type}-${item.folder.id}`"
-              :class="['dropdown-item', { highlighted: index === highlightedIndex }, item.type]"
-              @mousedown="selectFolder(item.folder)"
-              @mouseenter="highlightedIndex = index"
-              @keydown="handleItemKeydown($event, item)"
-              tabindex="-1"
-            >
-              <div class="folder-info">
-                <div class="folder-main">
-                  <div class="folder-name-section">
-                    <span class="folder-icon">📁</span>
-                    <span class="folder-name" v-html="highlightText(item.folder.title, searchQuery)"></span>
-                  </div>
-                  <div v-if="item.folder.children && item.folder.children.length > 0" class="folder-actions">
-                    <span class="children-count">
-                      ({{ item.folder.children.length }} {{ item.folder.children.length === 1 ? i18n.t('child') : i18n.t('children') }})
-                    </span>
-                    <span class="expand-hint">
-                      {{ i18n.t('tabToExpand') }}
-                    </span>
-                  </div>
-                </div>
-                <div v-if="item.folder.path" class="folder-breadcrumb">
-                  {{ item.folder.path }}
-                </div>
-                <div v-if="showChildrenFor === item.folder.id && item.folder.children && item.folder.children.length > 0" class="children-list">
-                  <div class="children-header">{{ i18n.t('contains') }}:</div>
-                  <div class="children-items">
-                    <span
-                      v-for="child in item.folder.children"
-                      :key="child.id"
-                      class="child-folder"
-                      @click.stop="selectFolder(child)"
-                    >
-                      📁 {{ child.title }}
-                    </span>
-                  </div>
-                </div>
+      <div v-if="searchResults.length > 0">
+        <div
+          v-for="(item, index) in searchResults"
+          :key="`${item.type}-${item.folder.id}`"
+          :class="['dropdown-item', { highlighted: index === highlightedIndex }, item.type]"
+          @mousedown="selectFolder(item.folder)"
+          @mouseenter="highlightedIndex = index"
+          @keydown="handleItemKeydown($event, item)"
+          tabindex="-1"
+        >
+          <div class="folder-info">
+            <div class="folder-main">
+              <div class="folder-name-section">
+                <span class="folder-icon">📁</span>
+                <span class="folder-name" v-html="highlightText(item.folder.title, searchQuery)"></span>
+              </div>
+              <div v-if="item.folder.children && item.folder.children.length > 0" class="folder-actions">
+                <span class="children-count">
+                  ({{ item.folder.children.length }} {{ item.folder.children.length === 1 ? i18n.t('child') : i18n.t('children') }})
+                </span>
+                <span class="expand-hint">
+                  {{ i18n.t('tabToExpand') }}
+                </span>
+              </div>
+            </div>
+            <div v-if="item.folder.path" class="folder-breadcrumb">
+              {{ item.folder.path }}
+            </div>
+            <div v-if="showChildrenFor === item.folder.id && item.folder.children && item.folder.children.length > 0" class="children-list">
+              <div class="children-header">{{ i18n.t('contains') }}:</div>
+              <div class="children-items">
+                <span
+                  v-for="child in item.folder.children"
+                  :key="child.id"
+                  class="child-folder"
+                  @click.stop="selectFolder(child)"
+                >
+                  📁 {{ child.title }}
+                </span>
               </div>
             </div>
           </div>
-          <div v-else class="no-results">
-            <div class="no-results-icon">🔍</div>
-            <div class="no-results-text">{{ i18n.t('noFoldersFound') }}</div>
-            <div class="no-results-hint">{{ i18n.t('tryDifferentSearch') }}</div>
-          </div>
+        </div>
+      </div>
+      <div v-else class="no-results">
+        <div class="no-results-icon">🔍</div>
+        <div class="no-results-text">{{ i18n.t('noFoldersFound') }}</div>
+        <div class="no-results-hint">{{ i18n.t('tryDifferentSearch') }}</div>
         </div>
       </div>
     </div>
+  </div>
   </div>
 </template>
 
@@ -244,6 +244,20 @@ const highlightText = (text: string, query: string) => {
 	return text.replace(regex, '<mark class="highlight">$1</mark>');
 };
 
+const scrollToHighlighted = () => {
+	setTimeout(() => {
+		const highlightedElement = document.querySelector(
+			'.dropdown-item.highlighted',
+		);
+		if (highlightedElement) {
+			highlightedElement.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+			});
+		}
+	}, 0);
+};
+
 const onSearchInput = () => {
 	searchFolders();
 	showDropdown.value = searchQuery.value.trim().length > 0;
@@ -294,10 +308,12 @@ const handleKeydown = (event: KeyboardEvent) => {
 				highlightedIndex.value + 1,
 				searchResults.value.length - 1,
 			);
+			scrollToHighlighted();
 		} else if (event.key === 'ArrowUp') {
 			event.preventDefault();
 			showChildrenFor.value = null; // Hide children when navigating
 			highlightedIndex.value = Math.max(highlightedIndex.value - 1, 0);
+			scrollToHighlighted();
 		} else if (event.key === 'ArrowRight') {
 			event.preventDefault();
 			const currentItem = searchResults.value[highlightedIndex.value];
@@ -409,11 +425,11 @@ onMounted(() => {
   left: 0;
   right: 0;
   background: white;
-  border: 1px solid #ddd;
+  border: 2px solid #007AFF;
   border-top: none;
-  border-radius: 0 0 6px 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  max-height: 300px;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
 }

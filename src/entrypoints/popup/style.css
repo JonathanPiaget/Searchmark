@@ -1,6 +1,6 @@
 html {
 	border-radius: 12px;
-	overflow: hidden;
+	overflow: visible;
 }
 
 body {
@@ -12,7 +12,7 @@ body {
 	color: #333;
 	background: #fff;
 	border-radius: 12px;
-	overflow: hidden;
+	overflow: visible;
 	min-height: 100vh;
 }
 
