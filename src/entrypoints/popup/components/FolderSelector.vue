@@ -16,42 +16,57 @@
           @blur="onBlur"
         >
         <div
-          v-if="showDropdown && searchQuery.trim() && searchResults.length > 0"
+          v-if="showDropdown && searchQuery.trim()"
           class="dropdown-container"
         >
-          <div
-            v-for="(item, index) in searchResults"
-            :key="`${item.type}-${item.folder.id}`"
-            :class="['dropdown-item', { highlighted: index === highlightedIndex }, item.type]"
-            @mousedown="selectFolder(item.folder)"
-            @mouseenter="highlightedIndex = index"
-          >
-            <div class="folder-info">
-              <div class="folder-main">
-                <span class="folder-icon">📁</span>
-                <span class="folder-name">{{ item.folder.title }}</span>
-                <span v-if="item.type === 'child'" class="child-indicator">{{ i18n.t('childOf') }}</span>
-              </div>
-              <div v-if="item.folder.path" class="folder-breadcrumb">
-                {{ item.folder.path }}
-              </div>
-              <div v-if="item.children && item.children.length > 0" class="children-list">
-                <div class="children-header">{{ i18n.t('contains') }}:</div>
-                <div class="children-items">
-                  <span
-                    v-for="child in item.children.slice(0, 3)"
-                    :key="child.id"
-                    class="child-folder"
-                    @click.stop="selectFolder(child)"
-                  >
-                    📁 {{ child.title }}
-                  </span>
-                  <span v-if="item.children.length > 3" class="more-children">
-                    +{{ item.children.length - 3 }} {{ i18n.t('more') }}
-                  </span>
+          <div v-if="searchResults.length > 0">
+            <div
+              v-for="(item, index) in searchResults"
+              :key="`${item.type}-${item.folder.id}`"
+              :class="['dropdown-item', { highlighted: index === highlightedIndex }, item.type]"
+              @mousedown="selectFolder(item.folder)"
+              @mouseenter="highlightedIndex = index"
+              @keydown="handleItemKeydown($event, item)"
+              tabindex="-1"
+            >
+              <div class="folder-info">
+                <div class="folder-main">
+                  <div class="folder-name-section">
+                    <span class="folder-icon">📁</span>
+                    <span class="folder-name" v-html="highlightText(item.folder.title, searchQuery)"></span>
+                  </div>
+                  <div v-if="item.folder.children && item.folder.children.length > 0" class="folder-actions">
+                    <span class="children-count">
+                      ({{ item.folder.children.length }} {{ item.folder.children.length === 1 ? i18n.t('child') : i18n.t('children') }})
+                    </span>
+                    <span class="tab-hint">
+                      {{ i18n.t('tabToExpand') }}
+                    </span>
+                  </div>
+                </div>
+                <div v-if="item.folder.path" class="folder-breadcrumb">
+                  {{ item.folder.path }}
+                </div>
+                <div v-if="showChildrenFor === item.folder.id && item.folder.children && item.folder.children.length > 0" class="children-list">
+                  <div class="children-header">{{ i18n.t('contains') }}:</div>
+                  <div class="children-items">
+                    <span
+                      v-for="child in item.folder.children"
+                      :key="child.id"
+                      class="child-folder"
+                      @click.stop="selectFolder(child)"
+                    >
+                      📁 {{ child.title }}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+          <div v-else class="no-results">
+            <div class="no-results-icon">🔍</div>
+            <div class="no-results-text">{{ i18n.t('noFoldersFound') }}</div>
+            <div class="no-results-hint">{{ i18n.t('tryDifferentSearch') }}</div>
           </div>
         </div>
       </div>
@@ -81,8 +96,7 @@ interface BookmarkFolder {
 
 interface SearchResultItem {
 	folder: BookmarkFolder;
-	type: 'match' | 'parent' | 'child';
-	children?: BookmarkFolder[];
+	type: 'match' | 'parent';
 }
 
 interface Props {
@@ -106,6 +120,7 @@ const folderMap = ref<Map<string, BookmarkFolder>>(new Map());
 const searchResults = ref<SearchResultItem[]>([]);
 const highlightedIndex = ref(-1);
 const selectedFolder = ref<BookmarkFolder | null>(null);
+const showChildrenFor = ref<string | null>(null);
 
 const buildFolderTree = (
 	nodes: BookmarkNode[],
@@ -199,38 +214,33 @@ const searchFolders = () => {
 	const addedIds = new Set<string>();
 
 	for (const folder of allFolders.value) {
+		// Only match folder title, not path
 		const titleMatch = folder.title.toLowerCase().includes(query);
-		const pathMatch = folder.path?.toLowerCase().includes(query);
 
-		if (titleMatch || pathMatch) {
+		if (titleMatch) {
 			if (!addedIds.has(folder.id)) {
 				// Add the matching folder
 				results.push({
 					folder,
 					type: 'match',
-					children: folder.children || [],
 				});
 				addedIds.add(folder.id);
-
-				// Add child folders as separate items if they exist
-				if (folder.children && folder.children.length > 0) {
-					for (const child of folder.children.slice(0, 5)) {
-						// Limit to 5 children
-						if (!addedIds.has(child.id)) {
-							results.push({
-								folder: child,
-								type: 'child',
-							});
-							addedIds.add(child.id);
-						}
-					}
-				}
 			}
 		}
 	}
 
-	searchResults.value = results.slice(0, 8); // Limit total results
+	searchResults.value = results.slice(0, 10); // Show more results since no children clutter
 	highlightedIndex.value = searchResults.value.length > 0 ? 0 : -1;
+};
+
+const highlightText = (text: string, query: string) => {
+	if (!query.trim()) return text;
+
+	const regex = new RegExp(
+		`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
+		'gi',
+	);
+	return text.replace(regex, '<mark class="highlight">$1</mark>');
 };
 
 const onSearchInput = () => {
@@ -256,6 +266,7 @@ const onBlur = () => {
 	// Delay hiding dropdown to allow click events
 	setTimeout(() => {
 		showDropdown.value = false;
+		showChildrenFor.value = null;
 		// Reset to empty after blur
 		if (!showDropdown.value) {
 			searchQuery.value = '';
@@ -275,13 +286,27 @@ const handleKeydown = (event: KeyboardEvent) => {
 	if (showDropdown.value && searchResults.value.length > 0) {
 		if (event.key === 'ArrowDown') {
 			event.preventDefault();
+			showChildrenFor.value = null; // Hide children when navigating
 			highlightedIndex.value = Math.min(
 				highlightedIndex.value + 1,
 				searchResults.value.length - 1,
 			);
 		} else if (event.key === 'ArrowUp') {
 			event.preventDefault();
+			showChildrenFor.value = null; // Hide children when navigating
 			highlightedIndex.value = Math.max(highlightedIndex.value - 1, 0);
+		} else if (event.key === 'Tab') {
+			event.preventDefault();
+			const currentItem = searchResults.value[highlightedIndex.value];
+			if (
+				currentItem?.folder.children &&
+				currentItem.folder.children.length > 0
+			) {
+				showChildrenFor.value =
+					showChildrenFor.value === currentItem.folder.id
+						? null
+						: currentItem.folder.id;
+			}
 		} else if (event.key === 'Enter') {
 			event.preventDefault();
 			if (
@@ -300,7 +325,18 @@ const handleKeydown = (event: KeyboardEvent) => {
 	} else if (event.key === 'Escape') {
 		showDropdown.value = false;
 		searchQuery.value = '';
+		showChildrenFor.value = null;
 		folderInput.value?.blur();
+	}
+};
+
+const handleItemKeydown = (event: KeyboardEvent, item: SearchResultItem) => {
+	if (event.key === 'Tab') {
+		event.preventDefault();
+		if (item.folder.children && item.folder.children.length > 0) {
+			showChildrenFor.value =
+				showChildrenFor.value === item.folder.id ? null : item.folder.id;
+		}
 	}
 };
 
@@ -415,21 +451,32 @@ onMounted(() => {
   color: white;
 }
 
-.dropdown-item:hover .child-indicator,
-.dropdown-item.highlighted .child-indicator {
-  background-color: rgba(255, 255, 255, 0.3);
-  color: white;
+.children-count {
+  font-size: 11px;
+  color: #666;
+  margin-left: 4px;
+  font-weight: normal;
 }
 
-.dropdown-item.child {
-  background-color: #fafbfc;
-  border-left: 3px solid #e1e5e9;
+.tab-hint {
+  font-size: 10px;
+  color: #999;
+  margin-left: auto;
+  background: #f0f0f0;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-style: italic;
 }
 
-.dropdown-item.child:hover,
-.dropdown-item.child.highlighted {
-  background-color: #007AFF;
-  border-left: 3px solid #0056b3;
+.dropdown-item:hover .children-count,
+.dropdown-item.highlighted .children-count {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dropdown-item:hover .tab-hint,
+.dropdown-item.highlighted .tab-hint {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .folder-info {
@@ -439,8 +486,22 @@ onMounted(() => {
 .folder-main {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
   margin-bottom: 2px;
+}
+
+.folder-name-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.folder-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .folder-icon {
@@ -469,8 +530,10 @@ onMounted(() => {
 }
 
 .children-list {
-  margin-top: 6px;
+  margin-top: 8px;
   margin-left: 18px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 6px;
 }
 
 .children-header {
@@ -482,27 +545,85 @@ onMounted(() => {
 
 .children-items {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .child-folder {
   font-size: 11px;
   color: #555;
   background: #f8f9fa;
-  padding: 2px 6px;
+  padding: 4px 8px;
   border-radius: 3px;
   cursor: pointer;
   transition: background-color 0.1s;
+  border: 1px solid #e9ecef;
 }
 
 .child-folder:hover {
-  background-color: #e9ecef;
+  background-color: #007AFF;
+  color: white;
+  border-color: #0056b3;
+}
+
+.dropdown-item:hover .child-folder,
+.dropdown-item.highlighted .child-folder {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.dropdown-item:hover .child-folder:hover,
+.dropdown-item.highlighted .child-folder:hover {
+  background-color: rgba(255, 255, 255, 1);
+  color: #007AFF;
+  border-color: #007AFF;
 }
 
 .more-children {
   font-size: 11px;
   color: #666;
   font-style: italic;
+}
+
+/* Highlighting styles */
+.highlight {
+  background-color: #ffeb3b;
+  color: #333;
+  font-weight: 600;
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+
+.dropdown-item.highlighted .highlight,
+.dropdown-item:hover .highlight {
+  background-color: #fff200;
+  color: #000;
+  font-weight: 700;
+}
+
+/* No results styles */
+.no-results {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.no-results-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.no-results-text {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.no-results-hint {
+  font-size: 12px;
+  color: #999;
 }
 </style>
