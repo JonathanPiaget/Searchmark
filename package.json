@@ -1,8 +1,8 @@
 {
-	"name": "wxt-vue-starter",
-	"description": "manifest.json description",
+	"name": "searchmark",
+	"description": "A browser extension for efficient bookmark management with search capabilities",
 	"private": true,
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "wxt",
