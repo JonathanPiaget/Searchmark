@@ -1,20 +1,7 @@
+import { getBookmarkToolbarId } from '../utils/bookmark';
+
 export default defineBackground(() => {
 	console.log('SearchMark background script loaded');
-
-	const getBookmarkToolbarId = async (): Promise<string> => {
-		try {
-			const bookmarkTree = await browser.bookmarks.getTree();
-			const bookmarkBar = bookmarkTree[0]?.children?.find(
-				(child) =>
-					child.title === 'Bookmarks bar' ||
-					child.title === 'Bookmarks Toolbar',
-			);
-			return bookmarkBar?.id || '1';
-		} catch (error) {
-			console.error('Error finding bookmark toolbar:', error);
-			return '1';
-		}
-	};
 
 	browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 		if (message.action === 'saveBookmark') {

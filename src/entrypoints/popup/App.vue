@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import { i18n } from '#i18n';
+import { getBookmarkToolbarId } from '../../utils/bookmark';
 import BookmarkForm from './components/BookmarkForm.vue';
 import FolderSelector from './components/FolderSelector.vue';
 import SaveButton from './components/SaveButton.vue';
@@ -13,15 +14,6 @@ const bookmarkUrl = ref('');
 const bookmarkTitle = ref('');
 const selectedFolderId = ref('');
 const selectedFolderName = ref('');
-
-const getBookmarkToolbarId = async () => {
-	try {
-		const [tree] = await browser.bookmarks.getTree();
-		return tree.children?.[0]?.id || '1';
-	} catch {
-		return '1';
-	}
-};
 
 const loadCurrentTab = async () => {
 	try {
