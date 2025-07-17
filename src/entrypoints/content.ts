@@ -1,3 +1,5 @@
+import { isOpenPopupShortcut, isQuickSaveShortcut } from '../utils/keyboard';
+
 export default defineContentScript({
 	matches: ['<all_urls>'],
 	main() {
@@ -54,19 +56,10 @@ export default defineContentScript({
 		};
 
 		const handleKeydown = (event: KeyboardEvent) => {
-			const isMac = navigator.userAgent.includes('Mac OS X');
-			const isOpenPopupShortcut = isMac
-				? event.metaKey && event.shiftKey && event.key === 's'
-				: event.ctrlKey && event.shiftKey && event.key === 's';
-
-			const isSaveShortcut = isMac
-				? event.metaKey && event.shiftKey && event.key === 'b'
-				: event.ctrlKey && event.shiftKey && event.key === 'b';
-
-			if (isOpenPopupShortcut) {
+			if (isOpenPopupShortcut(event)) {
 				event.preventDefault();
 				openPopup();
-			} else if (isSaveShortcut) {
+			} else if (isQuickSaveShortcut(event)) {
 				event.preventDefault();
 				saveBookmark();
 			}
