@@ -54,7 +54,8 @@
                   v-for="child in item.folder.children"
                   :key="child.id"
                   class="child-folder"
-                  @click.stop="selectFolder(child)"
+                  @click.stop="selectChildFolder(child)"
+                  @mousedown.stop
                 >
                   📁 {{ child.title }}
                 </span>
@@ -285,8 +286,15 @@ const selectFolder = (folder: BookmarkFolder) => {
 	selectedFolder.value = folder;
 	searchQuery.value = folder.title; // Show folder name in input
 	showDropdown.value = false;
+	showChildrenFor.value = null; // Hide expanded children
 	emit('update:modelValue', folder.id);
 	emit('folderSelected', { id: folder.id, name: folder.title });
+};
+
+const selectChildFolder = (child: BookmarkFolder) => {
+	// Find the full folder object from allFolders to ensure it has all properties
+	const fullFolder = allFolders.value.find((f) => f.id === child.id) || child;
+	selectFolder(fullFolder);
 };
 
 const onBlur = () => {
