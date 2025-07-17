@@ -43,13 +43,30 @@ export default defineContentScript({
 			}
 		};
 
+		const openPopup = async () => {
+			try {
+				await browser.runtime.sendMessage({
+					action: 'openPopup',
+				});
+			} catch (error) {
+				console.error('Error opening popup:', error);
+			}
+		};
+
 		const handleKeydown = (event: KeyboardEvent) => {
 			const isMac = navigator.userAgent.includes('Mac OS X');
-			const isShortcut = isMac
+			const isOpenPopupShortcut = isMac
 				? event.metaKey && event.shiftKey && event.key === 's'
-				: event.ctrlKey && event.key === 's';
+				: event.ctrlKey && event.shiftKey && event.key === 's';
 
-			if (isShortcut) {
+			const isSaveShortcut = isMac
+				? event.metaKey && event.shiftKey && event.key === 'b'
+				: event.ctrlKey && event.shiftKey && event.key === 'b';
+
+			if (isOpenPopupShortcut) {
+				event.preventDefault();
+				openPopup();
+			} else if (isSaveShortcut) {
 				event.preventDefault();
 				saveBookmark();
 			}

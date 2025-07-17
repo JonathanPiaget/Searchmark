@@ -9,7 +9,7 @@
           v-model="searchQuery"
           type="text"
           class="form-input"
-          :placeholder="selectedFolder ? selectedFolder.title : i18n.t('searchFolders')"
+          :placeholder="i18n.t('searchFolders')"
           @input="onSearchInput"
           @keydown="handleKeydown"
           @focus="onFocus"
@@ -39,7 +39,7 @@
                     <span class="children-count">
                       ({{ item.folder.children.length }} {{ item.folder.children.length === 1 ? i18n.t('child') : i18n.t('children') }})
                     </span>
-                    <span class="tab-hint">
+                    <span class="expand-hint">
                       {{ i18n.t('tabToExpand') }}
                     </span>
                   </div>
@@ -191,6 +191,7 @@ const loadFolders = async () => {
 			);
 			if (bookmarkToolbar) {
 				selectedFolder.value = bookmarkToolbar;
+				searchQuery.value = bookmarkToolbar.title; // Show folder name in input
 				emit('update:modelValue', bookmarkToolbar.id);
 				emit('folderSelected', {
 					id: bookmarkToolbar.id,
@@ -249,14 +250,14 @@ const onSearchInput = () => {
 };
 
 const onFocus = () => {
-	// Clear the input when focused
+	// Clear the input when focused for search
 	searchQuery.value = '';
 	showDropdown.value = false;
 };
 
 const selectFolder = (folder: BookmarkFolder) => {
 	selectedFolder.value = folder;
-	searchQuery.value = ''; // Keep input empty after selection
+	searchQuery.value = folder.title; // Show folder name in input
 	showDropdown.value = false;
 	emit('update:modelValue', folder.id);
 	emit('folderSelected', { id: folder.id, name: folder.title });
@@ -267,8 +268,10 @@ const onBlur = () => {
 	setTimeout(() => {
 		showDropdown.value = false;
 		showChildrenFor.value = null;
-		// Reset to empty after blur
-		if (!showDropdown.value) {
+		// If a folder is selected, restore its name; otherwise clear
+		if (!showDropdown.value && selectedFolder.value) {
+			searchQuery.value = selectedFolder.value.title;
+		} else if (!showDropdown.value) {
 			searchQuery.value = '';
 		}
 	}, 150);
@@ -295,7 +298,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 			event.preventDefault();
 			showChildrenFor.value = null; // Hide children when navigating
 			highlightedIndex.value = Math.max(highlightedIndex.value - 1, 0);
-		} else if (event.key === 'Tab') {
+		} else if (event.key === 'ArrowRight') {
 			event.preventDefault();
 			const currentItem = searchResults.value[highlightedIndex.value];
 			if (
@@ -314,6 +317,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 				searchResults.value[highlightedIndex.value]
 			) {
 				selectFolder(searchResults.value[highlightedIndex.value].folder);
+				return; // Don't emit enterPressed when selecting a folder
 			}
 			emit('enterPressed');
 			return;
@@ -331,7 +335,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 };
 
 const handleItemKeydown = (event: KeyboardEvent, item: SearchResultItem) => {
-	if (event.key === 'Tab') {
+	if (event.key === 'ArrowRight') {
 		event.preventDefault();
 		if (item.folder.children && item.folder.children.length > 0) {
 			showChildrenFor.value =
@@ -348,6 +352,7 @@ watch(
 			const folder = allFolders.value.find((f) => f.id === newValue);
 			if (folder) {
 				selectedFolder.value = folder;
+				searchQuery.value = folder.title; // Show folder name in input
 			}
 		}
 	},
@@ -458,7 +463,7 @@ onMounted(() => {
   font-weight: normal;
 }
 
-.tab-hint {
+.expand-hint {
   font-size: 10px;
   color: #999;
   margin-left: auto;
@@ -473,8 +478,8 @@ onMounted(() => {
   color: rgba(255, 255, 255, 0.8);
 }
 
-.dropdown-item:hover .tab-hint,
-.dropdown-item.highlighted .tab-hint {
+.dropdown-item:hover .expand-hint,
+.dropdown-item.highlighted .expand-hint {
   background-color: rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.9);
 }

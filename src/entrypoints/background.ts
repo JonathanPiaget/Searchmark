@@ -35,6 +35,17 @@ export default defineBackground(() => {
 				}
 			})();
 			return true; // Indicates that the response will be sent asynchronously
+		} else if (message.action === 'openPopup') {
+			(async () => {
+				try {
+					await browser.action.openPopup();
+					sendResponse({ success: true });
+				} catch (error) {
+					console.error('Error opening popup:', error);
+					sendResponse({ success: false, error: String(error) });
+				}
+			})();
+			return true; // Indicates that the response will be sent asynchronously
 		}
 	});
 });
