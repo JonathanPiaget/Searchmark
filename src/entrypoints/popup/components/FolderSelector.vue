@@ -249,11 +249,23 @@ const scrollToHighlighted = () => {
 		const highlightedElement = document.querySelector(
 			'.dropdown-item.highlighted',
 		);
-		if (highlightedElement) {
-			highlightedElement.scrollIntoView({
-				behavior: 'smooth',
-				block: 'nearest',
-			});
+		const dropdownContainer = document.querySelector('.dropdown-container');
+
+		if (highlightedElement && dropdownContainer) {
+			// Check if the element (including expanded children) is fully visible
+			const elementRect = highlightedElement.getBoundingClientRect();
+			const containerRect = dropdownContainer.getBoundingClientRect();
+
+			// If element is partially or fully out of view, scroll to it
+			if (
+				elementRect.top < containerRect.top ||
+				elementRect.bottom > containerRect.bottom
+			) {
+				highlightedElement.scrollIntoView({
+					behavior: 'smooth',
+					block: 'nearest',
+				});
+			}
 		}
 	}, 0);
 };
@@ -325,6 +337,8 @@ const handleKeydown = (event: KeyboardEvent) => {
 					showChildrenFor.value === currentItem.folder.id
 						? null
 						: currentItem.folder.id;
+				// Ensure expanded item is visible after expansion
+				setTimeout(() => scrollToHighlighted(), 100);
 			}
 		} else if (event.key === 'Enter') {
 			event.preventDefault();
@@ -555,6 +569,8 @@ onMounted(() => {
   margin-left: 18px;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   padding-top: 6px;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .children-header {
@@ -579,6 +595,9 @@ onMounted(() => {
   cursor: pointer;
   transition: background-color 0.1s;
   border: 1px solid #e9ecef;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .child-folder:hover {
