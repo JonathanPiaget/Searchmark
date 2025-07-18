@@ -116,7 +116,7 @@ const saveBookmark = async () => {
 .container {
   width: 320px;
   padding: 16px;
-  background: white;
+  background: linear-gradient(135deg, #fafbff 0%, #f5f3ff 100%);
 }
 
 .logo-container {
@@ -136,6 +136,6 @@ const saveBookmark = async () => {
   font-size: 18px;
   font-weight: 600;
   margin: 0;
-  color: #1a1a1a;
+  color: #5e33a9;
 }
 </style>

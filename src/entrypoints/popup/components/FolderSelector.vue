@@ -254,7 +254,7 @@ onMounted(() => {
 
 .shortcut-hint {
   font-size: 11px;
-  color: #666;
+  color: #6b46c1;
   margin-top: 2px;
   margin-bottom: 4px;
   font-style: italic;
@@ -268,7 +268,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   background: white;
-  border: 2px solid #007AFF;
+  border: 2px solid #5e33a9;
   border-top: none;
   border-radius: 0 0 8px 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -289,7 +289,7 @@ onMounted(() => {
 
 .dropdown-item:hover,
 .dropdown-item.highlighted {
-  background-color: #007AFF;
+  background-color: #5e33a9;
   color: white;
 }
 
@@ -317,7 +317,7 @@ onMounted(() => {
 
 .children-count {
   font-size: 11px;
-  color: #666;
+  color: #6b46c1;
   margin-left: 4px;
   font-weight: normal;
 }
@@ -326,7 +326,7 @@ onMounted(() => {
   font-size: 12px;
   color: #999;
   margin-left: 6px;
-  background: #f0f0f0;
+  background: #f3f0ff;
   padding: 2px 6px;
   border-radius: 3px;
   font-weight: 500;
@@ -379,7 +379,7 @@ onMounted(() => {
 
 .folder-name {
   font-weight: 500;
-  color: #333;
+  color: #2d1b4e;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -389,7 +389,7 @@ onMounted(() => {
 
 .child-indicator {
   font-size: 11px;
-  color: #666;
+  color: #6b46c1;
   background: #e9ecef;
   padding: 1px 4px;
   border-radius: 3px;
@@ -398,7 +398,7 @@ onMounted(() => {
 
 .folder-breadcrumb {
   font-size: 12px;
-  color: #666;
+  color: #6b46c1;
   opacity: 0.8;
   margin-left: 18px;
 }
@@ -414,7 +414,7 @@ onMounted(() => {
 
 .children-header {
   font-size: 11px;
-  color: #666;
+  color: #6b46c1;
   margin-bottom: 4px;
   font-weight: 500;
 }
@@ -428,47 +428,47 @@ onMounted(() => {
 .child-folder {
   font-size: 11px;
   color: #555;
-  background: #f8f9fa;
+  background: #faf9ff;
   padding: 4px 8px;
   border-radius: 3px;
   cursor: pointer;
   transition: background-color 0.1s;
-  border: 1px solid #e9ecef;
+  border: 1px solid #e1d7f0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .child-folder:hover {
-  background-color: #007AFF;
+  background-color: #5e33a9;
   color: white;
-  border-color: #0056b3;
+  border-color: #4a2889;
 }
 
 .dropdown-item:hover .child-folder,
 .dropdown-item.highlighted .child-folder {
   background-color: rgba(255, 255, 255, 0.9);
-  color: #333;
+  color: #2d1b4e;
   border-color: rgba(255, 255, 255, 0.7);
 }
 
 .dropdown-item:hover .child-folder:hover,
 .dropdown-item.highlighted .child-folder:hover {
   background-color: rgba(255, 255, 255, 1);
-  color: #007AFF;
-  border-color: #007AFF;
+  color: #5e33a9;
+  border-color: #5e33a9;
 }
 
 .more-children {
   font-size: 11px;
-  color: #666;
+  color: #6b46c1;
   font-style: italic;
 }
 
 /* Highlighting styles */
 .highlight {
   background-color: #ffeb3b;
-  color: #333;
+  color: #2d1b4e;
   font-weight: 600;
   padding: 1px 2px;
   border-radius: 2px;
@@ -485,7 +485,7 @@ onMounted(() => {
 .no-results {
   padding: 20px;
   text-align: center;
-  color: #666;
+  color: #6b46c1;
 }
 
 .no-results-icon {
@@ -498,7 +498,7 @@ onMounted(() => {
   font-size: 14px;
   font-weight: 500;
   margin-bottom: 4px;
-  color: #333;
+  color: #2d1b4e;
 }
 
 .no-results-hint {

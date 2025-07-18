@@ -9,7 +9,7 @@ body {
 		-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	font-size: 14px;
 	line-height: 1.4;
-	color: #333;
+	color: #2d1b4e;
 	background: #fff;
 	border-radius: 12px;
 	overflow: visible;
@@ -29,14 +29,14 @@ body {
 	margin-bottom: 4px;
 	font-size: 13px;
 	font-weight: 500;
-	color: #333;
+	color: #2d1b4e;
 }
 
 .form-input,
 .form-textarea {
 	width: 100%;
 	padding: 8px 12px;
-	border: 1px solid #ddd;
+	border: 1px solid #e1d7f0;
 	border-radius: 6px;
 	font-size: 14px;
 	box-sizing: border-box;
@@ -46,5 +46,6 @@ body {
 .form-input:focus,
 .form-textarea:focus {
 	outline: none;
-	border-color: #007aff;
+	border-color: #5e33a9;
+	box-shadow: 0 0 0 3px rgba(94, 51, 169, 0.1);
 }

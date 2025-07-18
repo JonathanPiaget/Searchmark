@@ -35,7 +35,7 @@ const handleSave = () => {
 }
 
 .save-button {
-  background: #007AFF;
+  background: linear-gradient(135deg, #5e33a9 0%, #7c4dff 100%);
   color: white;
   border: none;
   padding: 12px 16px;
@@ -47,7 +47,7 @@ const handleSave = () => {
 }
 
 .save-button:hover:not(:disabled) {
-  background: #0056CC;
+  background: linear-gradient(135deg, #4a2889 0%, #6a1b9a 100%);
 }
 
 .save-button:active:not(:disabled) {
@@ -64,14 +64,14 @@ const handleSave = () => {
   padding: 8px 12px;
   border-radius: 6px;
   text-align: center;
-  background: #E8F5E8;
-  color: #2D5A2D;
-  border: 1px solid #B8E6B8;
+  background: #f3f0ff;
+  color: #5e33a9;
+  border: 1px solid #d4c5f0;
 }
 
 .message.error {
-  background: #FFE6E6;
-  color: #CC0000;
-  border: 1px solid #FFB8B8;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
 }
 </style>
