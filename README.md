@@ -2,6 +2,10 @@
 
 A browser extension for efficient bookmark management with search capabilities.
 
+[![GitHub release](https://img.shields.io/github/release/JonathanPiaget/Searchmark.svg?style=flat-square)](https://github.com/JonathanPiaget/Searchmark/releases)
+[![License](https://img.shields.io/badge/License-MIT-lightrey.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+
+
 ## Features
 
 **Quick Save**
