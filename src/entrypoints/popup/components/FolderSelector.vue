@@ -15,13 +15,13 @@
           @focus="onFocus"
           @blur="onBlur"
         >
-        <div v-if="showDropdown && searchQuery.trim()" class="shortcut-hint">
-          {{ i18n.t('expandHint') }}
-        </div>
         <div
           v-if="showDropdown && searchQuery.trim()"
           class="dropdown-container"
         >
+          <div class="shortcut-hint">
+            {{ i18n.t('expandHint') }}
+          </div>
       <div v-if="searchResults.length > 0">
         <div
           v-for="(item, index) in searchResults"
@@ -255,11 +255,13 @@ onMounted(() => {
 .shortcut-hint {
   font-size: 11px;
   color: #6b46c1;
-  margin-top: 2px;
-  margin-bottom: 4px;
+  padding: 8px 12px;
   font-style: italic;
   text-align: center;
   opacity: 0.8;
+  background: #f8f6ff;
+  border-bottom: 1px solid #e1d7f0;
+  margin: 0;
 }
 
 .dropdown-container {
@@ -268,13 +270,13 @@ onMounted(() => {
   left: 0;
   right: 0;
   background: white;
-  border: 2px solid #5e33a9;
-  border-top: none;
-  border-radius: 0 0 8px 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid #e1d7f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(94, 51, 169, 0.15);
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
+  margin-top: 4px;
 }
 
 .dropdown-item {

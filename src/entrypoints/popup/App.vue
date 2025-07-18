@@ -114,7 +114,7 @@ const saveBookmark = async () => {
 
 <style scoped>
 .container {
-  width: 320px;
+  width: 380px;
   padding: 16px;
   background: linear-gradient(135deg, #fafbff 0%, #f5f3ff 100%);
 }
