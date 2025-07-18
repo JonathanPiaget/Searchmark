@@ -13,6 +13,20 @@ Find bookmark folders by typing their names. Navigate results with arrow keys an
 **Multi-language Support**
 Currently supports English and French, with the architecture in place to easily add additional languages in the future.
 
+## Planned Features
+
+1. Dark mode support
+2. Display in which folder the current tab is saved
+3. Full-text search across bookmark titles, URLs and folders
+4. Enable creating new folders during save process
+5. Customize hot keys and default folder for quick save
+6. Add a note to a bookmark
+7. Find a way to do a trash for deleted bookmarks
+8. List broken URLs bookmarks
+9. Auto backup locally on any change
+10. Add a button "see later" or similar to add in a dedicated folder
+11. Add more languages
+
 ## Development
 
 ### Setup
