@@ -43,13 +43,24 @@ export function useFolderSearch(
 	};
 
 	const highlightText = (text: string, query: string) => {
-		if (!query.trim()) return text;
+		if (!query.trim()) return [{ text, highlighted: false }];
 
 		const regex = new RegExp(
 			`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
 			'gi',
 		);
-		return text.replace(regex, '<mark class="highlight">$1</mark>');
+
+		const parts = text.split(regex);
+		const result = [];
+
+		for (let i = 0; i < parts.length; i++) {
+			if (parts[i]) {
+				const highlighted = regex.test(parts[i]);
+				result.push({ text: parts[i], highlighted });
+			}
+		}
+
+		return result;
 	};
 
 	return {

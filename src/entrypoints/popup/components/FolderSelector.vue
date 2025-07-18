@@ -36,7 +36,12 @@
             <div class="folder-main">
               <div class="folder-name-section">
                 <span class="folder-icon">📁</span>
-                <span class="folder-name" v-html="highlightText(item.folder.title, searchQuery)"></span>
+                <span class="folder-name">
+                  <template v-for="part in highlightText(item.folder.title, searchQuery)" :key="part.text">
+                    <span v-if="part.highlighted" class="highlight">{{ part.text }}</span>
+                    <span v-else>{{ part.text }}</span>
+                  </template>
+                </span>
               </div>
               <div v-if="item.folder.children && item.folder.children.length > 0" class="folder-actions">
                 <span class="children-count">
