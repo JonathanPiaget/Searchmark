@@ -51,23 +51,30 @@ const saveBookmark = async () => {
 			parentId: folderId,
 		});
 
-		// Show success notification in content script
-		const [tab] = await browser.tabs.query({
-			active: true,
-			currentWindow: true,
-		});
-		if (tab?.id) {
-			const notificationMessage = selectedFolderName.value
-				? i18n
-						.t('bookmarkSavedInFolder')
-						.replace('{folderName}', selectedFolderName.value)
-				: i18n.t('bookmarkSaved');
-
-			await browser.tabs.sendMessage(tab.id, {
-				type: 'SHOW_NOTIFICATION',
-				message: notificationMessage,
-				isError: false,
+		// Try to show success notification in content script (don't let failure affect save status)
+		try {
+			const [tab] = await browser.tabs.query({
+				active: true,
+				currentWindow: true,
 			});
+			if (tab?.id) {
+				const notificationMessage = selectedFolderName.value
+					? i18n
+							.t('bookmarkSavedInFolder')
+							.replace('{folderName}', selectedFolderName.value)
+					: i18n.t('bookmarkSaved');
+
+				await browser.tabs.sendMessage(tab.id, {
+					type: 'SHOW_NOTIFICATION',
+					message: notificationMessage,
+					isError: false,
+				});
+			}
+		} catch {
+			// Silently ignore notification errors - bookmark was still saved successfully
+			console.log(
+				'Could not show notification (content script not available on this page)',
+			);
 		}
 
 		// Close the popup
