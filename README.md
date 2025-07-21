@@ -31,6 +31,7 @@ Currently supports English and French, with the architecture in place to easily 
 9. Auto backup locally on any change
 10. Add a button "see later" or similar to add in a dedicated folder
 11. Add more languages
+12. Add tags to bookmarks
 
 ## Development
 
