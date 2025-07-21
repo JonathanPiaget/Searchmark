@@ -5,6 +5,7 @@ A browser extension for efficient bookmark management with search capabilities.
 [![GitHub release](https://img.shields.io/github/release/JonathanPiaget/Searchmark.svg?style=flat-square)](https://github.com/JonathanPiaget/Searchmark/releases)
 [![License](https://img.shields.io/badge/License-MIT-lightrey.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
+[<img height="72" src="./.github/assets/chrome-store.svg" alt="Available in the Chrome Web Store">](https://chromewebstore.google.com/detail/searchmark/ojcnjoecdiojbelkehfhibhljjaocfaf) [<img height="72" src="./.github/assets/firefox-addons.svg" alt="Available in the Firefox Addon Store">](https://addons.mozilla.org/en-US/firefox/addon/searchmark/)
 
 ## Features
 
