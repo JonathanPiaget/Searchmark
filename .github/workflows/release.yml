@@ -46,7 +46,7 @@ jobs:
   Submit:
     name: Submit
     needs: Version
-    if: ${{ needs.Version.outputs.version_changed == '1' }}
+    # if: ${{ needs.Version.outputs.version_changed == '1' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
