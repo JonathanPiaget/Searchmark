@@ -8,10 +8,6 @@ on:
     - cron: "0 7 * * 5" # at 7:00 AM on Friday
   workflow_dispatch: # to trigger manually
 
-permissions:
-  contents: read
-  issues: write
-
 jobs:
   auto-update:
     # Disables this workflow from running in a repository that is not part of the indicated organization/user
@@ -19,6 +15,7 @@ jobs:
     permissions:
       contents: write # for peter-evans/create-pull-request to create branch
       pull-requests: write # for peter-evans/create-pull-request to create a PR
+      issues: write # for peter-evans/create-pull-request to apply labels
 
     runs-on: ubuntu-latest
     steps:
