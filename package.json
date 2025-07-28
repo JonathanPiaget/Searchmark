@@ -19,13 +19,13 @@
 	},
 	"dependencies": {
 		"@wxt-dev/i18n": "^0.2.4",
-		"vue": "^3.5.13"
+		"vue": "^3.5.18"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.1.2",
 		"@wxt-dev/module-vue": "^1.0.2",
 		"typescript": "5.8.3",
-		"vue-tsc": "^3.0.3",
+		"vue-tsc": "^3.0.4",
 		"wxt": "^0.20.6"
 	},
 	"packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad"
